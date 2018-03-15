@@ -1,8 +1,14 @@
 package com.github.filipvencovsky.adventura.ui;
 
+import java.util.Observable;
+import java.util.Observer;
+
 import com.github.filipvencovsky.adventura.logika.IHra;
+import com.github.filipvencovsky.adventura.logika.Prostor;
+import com.github.filipvencovsky.adventura.logika.Vec;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
@@ -14,10 +20,12 @@ import javafx.scene.layout.GridPane;
  * @author Filip Vencovsky
  *
  */
-public class HomeController extends GridPane {
+public class HomeController extends GridPane implements Observer {
 	
 	@FXML private TextField vstupniText;
 	@FXML private TextArea vystup;
+	@FXML private ListView<Vec> seznamVeciMistnost;
+	@FXML private ListView<Prostor> seznamVychodu;
 	
 	private IHra hra;
 	
@@ -30,6 +38,10 @@ public class HomeController extends GridPane {
 		vystup.appendText("\n----------\n"+vstupniText.getText()+"\n----------\n");
 		vystup.appendText(vystupPrikazu);
 		vstupniText.setText("");
+		if(hra.konecHry()) {
+			vystup.appendText("\n----------\nKonec hry\n----------\n");
+			vstupniText.setDisable(true);
+		}
 	}
 	
 	/**
@@ -41,6 +53,18 @@ public class HomeController extends GridPane {
 		vystup.setText(hra.vratUvitani());
 		vystup.setEditable(false);
 		this.hra = hra;
+		seznamVeciMistnost.getItems().addAll(hra.getHerniPlan().getAktualniProstor().getVeci());
+		seznamVychodu.getItems().addAll(hra.getHerniPlan().getAktualniProstor().getVychody());
+		hra.getHerniPlan().addObserver(this);
+	}
+
+	@Override
+	public void update(Observable arg0, Object arg1) {
+		seznamVeciMistnost.getItems().clear();
+		seznamVychodu.getItems().clear();
+		seznamVeciMistnost.getItems().addAll(hra.getHerniPlan().getAktualniProstor().getVeci());
+		seznamVychodu.getItems().addAll(hra.getHerniPlan().getAktualniProstor().getVychody());
+		
 	}
 
 }
